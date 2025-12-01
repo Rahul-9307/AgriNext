@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Smart Fertilizer Recommendations</title>
+  <style>
+    :root{
+  --bg:#0f1720;
+  --panel:#14161a;
+  --muted:#9aa0a6;
+  --accent:#0fb5b5;
+  --card:#0b0d0f;
+  --glass: rgba(255,255,255,0.03);
+  --success:#163d2d;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;}
+body{
+  background: linear-gradient(180deg, #081018 0%, #0b1116 100%);
+  color:#e6eef6;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  padding:24px;
+}
+
+/* layout */
+.app{display:flex;gap:28px;max-width:1300px;margin:0 auto;}
+.controls{
+  width:320px;padding:22px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.6);
+  border:1px solid rgba(255,255,255,0.02);
+}
+.brand{margin:0 0 18px 0;font-size:20px;color:white}
+
+.field{display:block;margin-bottom:16px;font-size:14px;color:var(--muted)}
+.field span{display:block;margin-bottom:8px;color:var(--muted);font-weight:600}
+
+.number-input{display:flex;align-items:center;gap:8px}
+.number-input input[type="number"]{
+  flex:1;padding:10px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:inherit;font-size:15px;
+  outline:none;
+}
+.number-input button{
+  width:36px;height:36px;border-radius:8px;border:none;background:var(--glass);color:#fff;font-size:18px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+}
+select{width:100%;padding:10px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.03);color:inherit}
+
+.btn{
+  width:100%;padding:12px;border-radius:10px;background:linear-gradient(90deg,var(--accent),#068b8b);border:none;color:#061618;font-weight:700;cursor:pointer;margin-top:6px;
+}
+.hint{font-size:12px;color:var(--muted);margin-top:12px}
+
+/* main content */
+.content{flex:1;display:flex;flex-direction:column;gap:18px}
+.hero img{width:100%;height:260px;object-fit:cover;border-radius:12px;border:1px solid rgba(255,255,255,0.03)}
+.result h2{text-align:center;font-size:34px;margin:10px 0 6px 0;letter-spacing:1px}
+.output{background:var(--panel);border-radius:10px;padding:18px;border:1px solid rgba(255,255,255,0.02)}
+.output h3{margin:0 0 12px 0;color:var(--muted)}
+.message{background:linear-gradient(90deg,#133826,#153b2f);padding:14px;border-radius:8px;color:#d7f6e0;font-weight:600}
+.explain{margin-top:12px;color:var(--muted);font-size:14px;line-height:1.4}
+
+/* responsive */
+@media (max-width:900px){
+  .app{flex-direction:column;padding:16px}
+  .controls{width:100%}
+}
+
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="controls" aria-label="Controls">
+      <h1 class="brand">AgriSens</h1>
+
+      <label class="field">
+        <span>Temperature (°C)</span>
+        <div class="number-input">
+          <button data-action="dec" data-target="temp">−</button>
+          <input id="temp" type="number" value="25" min="-10" max="60">
+          <button data-action="inc" data-target="temp">+</button>
+        </div>
+      </label>
+
+      <label class="field">
+        <span>Humidity (%)</span>
+        <div class="number-input">
+          <button data-action="dec" data-target="hum">−</button>
+          <input id="hum" type="number" value="50" min="0" max="100">
+          <button data-action="inc" data-target="hum">+</button>
+        </div>
+      </label>
+
+      <label class="field">
+        <span>Nitrogen in soil (ppm)</span>
+        <div class="number-input">
+          <button data-action="dec" data-target="nitro">−</button>
+          <input id="nitro" type="number" value="100" min="0" max="1000">
+          <button data-action="inc" data-target="nitro">+</button>
+        </div>
+      </label>
+
+      <label class="field">
+        <span>Potassium in soil (ppm)</span>
+        <div class="number-input">
+          <button data-action="dec" data-target="pot">−</button>
+          <input id="pot" type="number" value="100" min="0" max="1000">
+          <button data-action="inc" data-target="pot">+</button>
+        </div>
+      </label>
+
+      <label class="field">
+        <span>Phosphorous in soil (ppm)</span>
+        <div class="number-input">
+          <button data-action="dec" data-target="phos">−</button>
+          <input id="phos" type="number" value="100" min="0" max="1000">
+          <button data-action="inc" data-target="phos">+</button>
+        </div>
+      </label>
+
+      <label class="field">
+        <span>Select Soil Type</span>
+        <select id="soil">
+          <option>Loamy</option>
+          <option>Sandy</option>
+          <option>Clay</option>
+          <option>Silt</option>
+          <option>Peaty</option>
+        </select>
+      </label>
+
+      <label class="field">
+        <span>Select Crop</span>
+        <select id="crop">
+          <option>Sugarcane</option>
+          <option>Wheat</option>
+          <option>Rice</option>
+          <option>Maize</option>
+          <option>Tomato</option>
+          <option>Potato</option>
+          <option>Other</option>
+        </select>
+      </label>
+
+      <button id="predictBtn" class="btn">Predict</button>
+      <p class="hint">Tip: adjust N/P/K values and hit Predict to get suggestions.</p>
+    </aside>
+
+    <main class="content">
+      <div class="hero">
+        <img src="../images/fertilize.avif" alt="spraying tractor in field">
+      </div>
+
+      <section class="result">
+        <h2>SMART FERTILIZER RECOMMENDATIONS</h2>
+
+        <div class="output">
+          <h3>Output</h3>
+          <div id="message" class="message">Enter values and click <strong>Predict</strong>.</div>
+
+          <div id="explain" class="explain" aria-live="polite"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    /* Simple fertilizer recommendation logic.
+   This is deterministic rule-based logic meant for demo/education.
+   In production you'd use validated agronomic models or ML trained on local data.
+*/
+
+const predictBtn = document.getElementById('predictBtn');
+const messageEl = document.getElementById('message');
+const explainEl = document.getElementById('explain');
+
+function getInputs(){
+  return {
+    temp: Number(document.getElementById('temp').value || 0),
+    hum: Number(document.getElementById('hum').value || 0),
+    n: Number(document.getElementById('nitro').value || 0),
+    k: Number(document.getElementById('pot').value || 0),
+    p: Number(document.getElementById('phos').value || 0),
+    soil: document.getElementById('soil').value,
+    crop: document.getElementById('crop').value
+  };
+}
+
+/* fertilizer recommendation rules:
+   - Low N -> UREA (quick N)
+   - Low P -> DAP or SSP
+   - Low K -> MOP (potash)
+   - Balanced but low all -> NPK blend
+   - Sandy soil -> add organic compost
+   - Crop-specific preferences (simple heuristics)
+*/
+function recommend(data){
+  const suggestions = [];
+  // thresholds are simple ppm/heuristic cutoffs for demo
+  if (data.n < 60) suggestions.push({type: 'UREA', reason: 'low nitrogen in soil'});
+  if (data.p < 40) suggestions.push({type: 'DAP (Diammonium Phosphate)', reason: 'low phosphorous in soil'});
+  if (data.k < 50) suggestions.push({type: 'MOP (Muriate of Potash)', reason: 'low potassium in soil'});
+
+  // If all are moderate/high -> balanced fertilizer
+  if (data.n >= 60 && data.p >= 40 && data.k >= 50) {
+    // crops that prefer balanced mixes
+    if (['Rice','Tomato','Potato','Other'].includes(data.crop)) {
+      suggestions.push({type: 'NPK 20-20-20', reason: 'soil nutrients are balanced — use an NPK blend for maintenance'});
+    } else {
+      // cereals / high N crops might still want UREA
+      if (data.crop === 'Sugarcane') suggestions.push({type: 'UREA', reason: 'sugarcane has high nitrogen demands'});
+      else suggestions.push({type: 'NPK 19-19-19', reason: 'balanced maintenance nutrients'});
+    }
+  }
+
+  // Crop-specific overrides/priority
+  if (data.crop === 'Sugarcane' && !suggestions.find(s=>s.type.includes('UREA'))) {
+    suggestions.unshift({type:'UREA', reason:'sugarcane benefits from higher nitrogen'});
+  }
+  if (data.crop === 'Wheat' && data.p < 60) suggestions.unshift({type:'DAP (Phosphorus-rich)', reason:'wheat benefits from phosphorus for root development'});
+
+  // Soil type adjustments
+  if (data.soil === 'Sandy') {
+    suggestions.push({type:'Compost / Organic Matter', reason:'sandy soils lose nutrients quickly; add compost to improve retention'});
+  } else if (data.soil === 'Clay') {
+    suggestions.push({type:'Gypsum (if sodium present) or well-rotted compost', reason:'heavy clay benefits from structure improvement and drainage'});
+  }
+
+  // Environment-based suggestion (simple)
+  if (data.temp > 40) {
+    suggestions.push({type:'Split application', reason:'high temperatures increase volatilization — split doses to reduce losses'});
+  }
+  if (data.hum > 85) {
+    suggestions.push({type:'Avoid foliar sprays', reason:'very humid conditions increase disease risk — prefer soil application'});
+  }
+
+  // Consolidate suggestions (unique and prioritized)
+  const seen = new Set();
+  const unique = [];
+  for (const s of suggestions) {
+    if (!seen.has(s.type)) { seen.add(s.type); unique.push(s); }
+  }
+
+  // If nothing suggested (very rich soil), recommend maintenance
+  if (unique.length === 0) {
+    return {
+      label: 'Soil Fertility Adequate',
+      details: [{type:'Apply light NPK or organic matter', reason:'soil nutrients appear adequate; apply small maintenance dose or compost.'}]
+    };
+  }
+  return { label: unique[0].type, details: unique };
+}
+
+function renderResult(result, data){
+  messageEl.textContent = `The recommended fertilizer for your crop is: ${result.label}`;
+  explainEl.innerHTML = ''; // clear
+  const ul = document.createElement('ul');
+  for (const d of result.details) {
+    const li = document.createElement('li');
+    li.textContent = `${d.type} — ${d.reason}`;
+    ul.appendChild(li);
+  }
+  explainEl.appendChild(ul);
+
+  // add small contextual advice
+  const advice = document.createElement('p');
+  advice.style.marginTop = '10px';
+  advice.style.color = '#bcd0c6';
+  advice.style.fontSize = '13px';
+  advice.textContent = `Crop: ${data.crop} · Soil: ${data.soil} · N:${data.n}ppm P:${data.p}ppm K:${data.k}ppm`;
+  explainEl.appendChild(advice);
+}
+
+/* event handlers */
+predictBtn.addEventListener('click', () => {
+  const inputs = getInputs();
+  const result = recommend(inputs);
+  renderResult(result, inputs);
+});
+
+/* +/- buttons behavior */
+document.querySelectorAll('[data-action]').forEach(btn=>{
+  btn.addEventListener('click', (e)=>{
+    const action = btn.getAttribute('data-action');
+    const targetId = btn.getAttribute('data-target');
+    const input = document.getElementById(targetId);
+    if (!input) return;
+    const step = Number(input.step) || 1;
+    const min = (input.min !== '') ? Number(input.min) : -Infinity;
+    const max = (input.max !== '') ? Number(input.max) : Infinity;
+    let val = Number(input.value) || 0;
+    if (action === 'inc') val += step;
+    else val -= step;
+    val = Math.max(min, Math.min(max, val));
+    input.value = val;
+    // optional: live predict if you want:
+    // predictBtn.click();
+  });
+});
+
+/* keyboard accessibility: enter on inputs triggers predict */
+document.querySelectorAll('.controls input, .controls select').forEach(el=>{
+  el.addEventListener('keydown', e=>{
+    if (e.key === 'Enter') predictBtn.click();
+  });
+});
+
+  </script>
+</body>
+</html>
